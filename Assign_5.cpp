@@ -1,195 +1,214 @@
-//============================================================================
-// Name        : Assignment_5.cpp
-// Author      : Harsh Gaggar
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
-//============================================================================
+/*
+Implement all the functions of a dictionary (ADT) using open
+hashing technique: separate chaining using linked list Data: Set of
+(key, value) pairs, Keys are mapped to values, Keys must be
+comparable, and Keys must be unique. Standard Operations: Insert
+(key, value), Find(key), Delete(key)
 
-#include<iostream>
-#include<string.h>
-using namespace std;
+|-------|
+|   4   | -> abcd -> cdba -> dbca
+|-------|
+|   0   | -> laal -> lala -> aall
+|-------|
+|   8   | -> dwupd -> puddw
+|-------|
 
-class SLL
-{
-public:
-    int key;
-    char val[10];
-    SLL *next;
-}HT[6];
 
-class OpenHash
-{
-public:
-    SLL *node;
-    OpenHash()
-    {
-        for(int i=0; i<6; i++)
-        {
-            HT[i].key = 0;
-            strcpy(HT[i].val,"---");
-            HT[i].next = NULL;
-        }
-    }
-    void insert_KeyVal();
-    void show_Table();
-    void find_KeyVal(int key);
-    void delete_KeyVal(int key);
+*/
+
+#include <iostream>
+#include <string>
+using namespace std; 
+
+class Node {
+    string key;
+    string value;
+    Node *next = nullptr;
+
+    friend class Dictionary;
 };
 
-void OpenHash :: insert_KeyVal()
-{
-    int i, cnt, index;
-    SLL *Newnode, *temp;
+class Dictionary {
 
-    cout<<"\n\t How many Key-Value Pairs to Insert: ";
-    cin>>cnt;
+    Node **table;
+    int tableSize;
 
-    for(i=0; i<cnt; i++)
-    {
-        Newnode = new SLL;
-
-        cout<<"\n\t Enter Key : ";
-        cin>>Newnode->key;
-        cout<<"\n\t Enter Val : ";
-        cin>>Newnode->val;
-        Newnode->next = NULL;
-
-
-        index = Newnode->key % 6;
-
-        if(HT[index].next == NULL)
-        {
-            HT[index].next = Newnode;
-        }
-        else
-        {
-            temp = HT[index].next;
-            while(temp->next != NULL)
-                temp = temp->next;
-            temp->next = Newnode;
-        }
+    int hash( string value ) {
+        int asciiSum = 0;
+        for( int i = 0; i < value.length(); i++ ) {
+            asciiSum += int( value[i] );
+        } 
+        return asciiSum % tableSize ;
     }
-}
 
-void OpenHash :: show_Table()
-{
-    int i;
-    SLL *temp;
-
-    cout<<"\n\n\t Index Key->Value.....";
-    for(i=0; i<6; i++)
-    {
-        cout<<"\n\n\t"<<i<<"--->";
-        temp = HT[i].next;
-        while(temp)
-        {
-            cout<<"("<<temp->key<<","<<temp->val<<")---->";
-            temp = temp->next;
-        }
-        cout<<"Null" << endl;
+    void insertLL( Node *headNode, string key, string value ) {
+        Node *currentNode = headNode;
+        while( currentNode->next != nullptr )
+            currentNode = currentNode->next;
+        Node *newNode = new ( Node );
+        newNode->key = key;
+        newNode->next = NULL;
+        newNode->value = value;
+        currentNode->next = newNode;
     }
-}
 
-void OpenHash :: find_KeyVal(int key)
-{
-
-    SLL *temp;
-
-    int idx = key % 6;
-    temp = HT[idx].next;
-    bool found = false;
-    cout << endl;
-    while(temp)
-    {
-        if(temp->key == key){
-        	cout << "found" << endl;
-            cout << "\t"<<temp->key<<","<<temp->val<<endl;;
-            found = true;
-            break;
-        }else{
-            temp = temp->next;
-        }
-
-    }
-    if(found == false) cout << "key not found" << endl;
-}
-
-void OpenHash :: delete_KeyVal(int key){
-
-    SLL *temp;
-
-    int idx = key % 6;
-    temp = HT[idx].next;
-    cout << endl;
-    if(temp == nullptr){
-        cout << "no key to delete" << endl;
-        return;
-    }else if(temp->key == key){
-        HT[idx].next = temp->next;
-        show_Table();
-    }else{
-        while(temp){
-        if(temp->next->key == key){
-            temp->next = temp->next->next;
-            show_Table();
-            break;
-        }else{
-            temp = temp->next;
-        }
-
-    }
-    }}
-
-
-
-void display() {
-    cout << "1. Insert\n";
-    cout << "2. Search with key\n";
-    cout << "3. Delete with key\n";
-    cout << "4. Show table\n";
-
-    cout << "5. END\n";
-}
-
-int main()
-{
-    OpenHash H1;
-    int key;
-
-    int choice;
-        while (true) {
-            display();
-            cin >> choice;
-            switch (choice) {
-                case 1:
-                	  H1.insert_KeyVal();
-                    break;
-                case 2:
-                	cout << "enter key to search" << endl;
-                	cin >> key;
-                	H1.find_KeyVal(key);
-                    break;
-                case 3:
-                	cout << "enter key to delete" << endl;
-                	cin >> key;
-                	H1.delete_KeyVal(key);
-
-
-                    break;
-                case 4:
-					H1.show_Table();
-					break;
-
-                default:
-                	cout << "Enter correct choice.." << endl;
-                	break;
+    // Finds the Linked List mapped to the Key
+    Node* findLL ( Node *headNode, string key ) {
+        Node *currentNode = headNode;
+        while( currentNode->next != NULL ) {
+            if( currentNode->key == key ) {
+                return currentNode;
             }
+            currentNode = currentNode -> next;
+        }
+        if(currentNode->key == key) return currentNode;
+        else return nullptr;
+    }
+
+    // Prints the Linked List mapped to the Key
+    void printLL( Node* headNode ) {
+        Node* currentNode = headNode ;
+        while( currentNode != nullptr ) {
+            // cout.width(5);
+            cout << currentNode -> key << " " << currentNode -> value << "," ;
+            currentNode = currentNode -> next ;
+        }
+    }
+
+    // Deletes from the Linked List mapped to the key
+    void deleteLL( int index, Node* headNode, string key ) {
+
+        if(headNode == NULL)
+            cout<<"No such record exists to be deleted!"<<endl;
+        
+        else if( headNode->key == key ) {
+            Node *nextNode = headNode->next;
+            delete table[ index ];
+            table[ index ] = nextNode;
+        }
+        
+        else {
+            Node *currentNode = headNode;
+            Node *prevNode = NULL;
+            while( currentNode->next != nullptr ) {
+                if( currentNode->key == key )
+                    break;
+                prevNode = currentNode;
+                currentNode = currentNode->next;
+            }
+        
+            if (currentNode->key == key) {
+                prevNode->next = currentNode->next;
+                delete currentNode;
+            }
+
+            else cout<<"No such element"<<endl;
+        }
+    }
+
+    public: 
+    
+    Dictionary ( int n ) {
+        this->tableSize = n;
+        table = new Node*[ tableSize ];
+        for( int i = 0; i < tableSize; i++ ) {
+            table[i] = nullptr;
+        }
+    } 
+
+    void insert( string key, string value ) {
+        int hashAddress = hash( key );
+        if( table[ hashAddress ] == nullptr ) {
+            Node *newNode = new ( Node );
+            newNode->key = key;
+            newNode->next = NULL;
+            newNode->value = value;
+            table[ hashAddress ] = newNode;
         }
 
+        else {
+            insertLL(table[ hashAddress ], key, value );
+        }
+    }
 
+    void display() {
+        for( int i = 0; i < tableSize; i++ ) {
+            // cout.width( 5 );
+            cout<<i<<" ";
+            printLL( table[i] );
+            cout<<endl;
+        }
+    }
 
+    void search( string key ) {
+        int hashAddress = hash(key);
+        Node *foundNode = findLL( table[ hashAddress ], key );
+        if( foundNode == nullptr )
+            cout<<"No record found"<<endl;
+        else {
+            cout<<"\nKey: "<<key<<endl;
+            cout<<"Value: "<<foundNode->value<<endl;
+        }
+    }
 
+    void del( string key ) {
+        int hashAddress = hash(key);
+        deleteLL( hashAddress, table[ hashAddress ], key);
+    }
+};
+
+int main() {
+
+    Dictionary dict(10);
+
+    // Placeholder values
+    dict.insert("abcd", "1000");
+    dict.insert("cdba", "2000");
+    dict.insert("dbca","5000");
+
+    dict.insert("laal", "1000");
+    dict.insert("lala", "2000");
+    dict.insert("aall","5000");
+
+    dict.insert("dwupd", "1000");
+    dict.insert("puddw", "2000");
+    
+    while( true ) {
+        cout<<"1. Insert key:value pair"<<endl;
+        cout<<"2. Search for value with key"<<endl;
+        cout<<"3. Delete the key:value pair"<<endl;
+        cout<<"4. Display the dictionary"<<endl;
+        cout<<"\nEnter your choice (any other i/p for exit) : ";
+        int choice;
+        cin>>choice;
+
+        if( choice == 1) {
+            string key, value;
+            cout<<"Enter key: "; cin>>key;
+            cout<<"Enter corresponding value: "; cin>>value;
+            dict.insert( key, value ); 
+        }
+        
+        else if( choice == 2) {
+            string key;
+            cout<<"Enter key: "; cin>>key;
+            dict.search( key );
+        }
+
+        else if( choice == 3) {
+            string key;
+            cout<<"Enter key: "; cin>>key;
+            dict.del( key );
+            // cout<< key << " has been deleted"<<endl;
+        }
+
+        else if( choice == 4 ) {
+            dict.display();
+        }
+
+        else 
+            break;
+    }
 
     return 0;
 }
