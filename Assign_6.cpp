@@ -1,192 +1,229 @@
+/*
+Represent a given graph using adjacency matrix/list to perform DFS and using adjacency list to 
+perform BFS. Use the map of the area around the college as the graph. 
+Identify the prominent land marks as nodes and perform DFS and BFS on that.
+Functions to be implemented:
+1. Read graph
+2. Display adjacency list
+3. DFS
+4. BFS
+5. indegree & outdegree
+6. isConnected
+*/
+
 #include <iostream>
 #include <queue>
+#include <string>
 #include <stack>
-#include <map>
+#include <vector>
 using namespace std;
 
-class DLLNode
-{
-public:
-    char vertex[20];
-    DLLNode *next;
-    DLLNode *down;
-} *Head;
+class Node {
+    public:
+    string name;
+    Node *next;
+    Node *down;
 
-class Graph : public DLLNode
-{
-public:
-    DLLNode *create_Graph(DLLNode *Head);
-    void display_Graph(DLLNode *Head);
-    void DFS(DLLNode *Head);
-    void BFS(DLLNode *Head);
+    Node( string n = "" ) {
+        name = n;
+        next = nullptr;
+        down = nullptr;
+    }
 };
 
-DLLNode *Graph ::create_Graph(DLLNode *Head)
+class Graph
 {
-    int i, vertices;
-    DLLNode *Newnode, *current, *temp;
+    Node *head = nullptr;
 
-    cout << "\n\t How Many Vertices in Graph: ";
-    cin >> vertices;
-
-    for (i = 0; i < vertices; i++)
-    {
-        Newnode = new DLLNode;
-
-        cout << "\n\t Enter Vertex Name: ";
-        cin >> Newnode->vertex;
-        Newnode->next = NULL;
-        Newnode->down = NULL;
-
-        if (Head == NULL)
-        {
-            Head = Newnode;
-            current = Head;
-        }
-        else
-        {
-            current->down = Newnode;
-            current = Newnode;
-        }
-    }
-
-    current = Head;
-    while (current != NULL)
-    {
-        cout << "\n\t How Many Adjacent Vertices for " << current->vertex << ":  ";
-        cin >> vertices;
-        temp = current;
-        for (i = 0; i < vertices; i++)
-        {
-            Newnode = new DLLNode;
-            cout << "\n\t Enter Vertex Name: ";
-            cin >> Newnode->vertex;
-
-            Newnode->next = NULL;
-            Newnode->down = NULL;
-
-            temp->next = Newnode;
-            temp = Newnode;
-        }
-        current = current->down;
-    }
-
-    return Head;
-}
-
-void Graph ::display_Graph(DLLNode *Head)
-{
-    DLLNode *current, *temp;
-
-    current = Head;
-    while (current != NULL)
-    {
-        cout << "\n\t " << current->vertex;
-        temp = current->next;
-        while (temp)
-        {
-            cout << "----->" << temp->vertex;
-            temp = temp->next;
-        }
-        current = current->down;
-    }
-}
-void Graph ::DFS(DLLNode *Head)
-{
-    if (Head == NULL)
-        return;
-
-    stack<DLLNode *> s;
-    map<string, bool> visited;
-
-    s.push(Head);
-
-    while (!s.empty())
-    {
-        DLLNode *current = s.top();
-        s.pop();
-
-        if (!visited[current->vertex])
-        {
-            cout << current->vertex << " ";
-            visited[current->vertex] = true;
+    void add( string NodeA, string NodeB ) {
+        // If adjacency list is empty
+        if( head == nullptr ) {
+            Node *node1 = new Node( NodeA );
+            Node *node2 = new Node( NodeB );
+            head = node1;
+            node1->next = node2;
         }
 
-        // Traverse next (adjacent vertices)
-        DLLNode *temp = current->next;
-        while (temp)
-        {
-            if (!visited[temp->vertex])
-            {
-                s.push(temp);
+        else {
+            Node *currentNode = head;
+            Node *prevNode = nullptr;
+            bool found = false;
+            while( currentNode != nullptr ) {
+
+                // If NodeA is found
+                if( currentNode->name == NodeA ) {
+                    found = true;
+                    Node *currentListNode = currentNode;
+                    while( currentListNode->next != nullptr )
+                        currentListNode = currentListNode->next;
+                    Node *newNode = new Node( NodeB );
+                    currentListNode->next = newNode;
+                    break;
+                }
+                prevNode = currentNode;
+                currentNode = currentNode->down;
+
             }
-            temp = temp->next;
-        }
 
-        // Traverse down (to next main vertex)
-        if (current->down && !visited[current->down->vertex])
-        {
-            s.push(current->down);
-        }
-    }
-}
-void Graph ::BFS(DLLNode *Head)
-{
-    if (Head == NULL)
-        return;
-
-    queue<DLLNode *> q;
-    map<string, bool> visited;
-
-    q.push(Head);
-    visited[Head->vertex] = true;
-
-    while (!q.empty())
-    {
-        DLLNode *current = q.front();
-        q.pop();
-        cout << current->vertex << " ";
-
-        // Traverse next (adjacent vertices)
-        DLLNode *temp = current->next;
-        while (temp)
-        {
-            if (!visited[temp->vertex])
-            {
-                q.push(temp);
-                visited[temp->vertex] = true;
+            // If NodeA is not found
+            if(!found) {
+                Node *newNode1 = new Node( NodeA );
+                Node *newNode2 = new Node( NodeB );
+                prevNode->down = newNode1;
+                newNode1->next = newNode2;
             }
-            temp = temp->next;
-        }
-
-        // Traverse down (to next main vertex)
-        if (current->down && !visited[current->down->vertex])
-        {
-            q.push(current->down);
-            visited[current->down->vertex] = true;
         }
     }
-}
 
+    public:
 
-int main()
-{
-    cout << "\n\n.........Graph by Adjacency List............";
+    void addNode( string NodeA, string NodeB ) {
+        add( NodeA, NodeB );
+        add( NodeB, NodeA );
+    }
 
-    Graph G1;
-    Head = NULL;
+    void print() {
+        Node *currentArrayNode = head;
+        while( currentArrayNode != nullptr ) {
+            Node *currentListNode = currentArrayNode;
+            while( currentListNode != nullptr ) {
+                cout<< currentListNode->name << " -> ";
+                currentListNode = currentListNode->next;
+            }
+            cout<<endl;
+            currentArrayNode = currentArrayNode->down;
+        }
+    }
 
-    cout << "\n\n A] Create Graph using Linked List............\n";
-    Head = G1.create_Graph(Head);
+    void printOutDegrees() {
+        Node *currentArrayNode = head;
+        while(currentArrayNode != nullptr ) {
+            Node *currentListNode = currentArrayNode;
+            int degree = 0;
+            while( currentListNode != nullptr ) {
+                degree++;
+                currentListNode = currentListNode->next;
+            }
+            cout<< currentArrayNode->name << " : " << degree<<endl;
+            currentArrayNode = currentArrayNode->down;
+        }
+    }
 
-    cout << "\n\n B] Show Graph using Linked List............\n";
-    G1.display_Graph(Head);
+    void printInDegrees() {
+        Node *currentNode = head;
+        while( currentNode != nullptr ) {
+            int count = 0;
+            Node *temp = head;
+            while( temp != nullptr ) {
+                Node *neighbour = temp->next;
+                while( neighbour != nullptr ) {
+                    if( neighbour->name == currentNode->name ) 
+                        count++;
+                    neighbour = neighbour->next;
+                }
+                temp = temp->down;
+            }
+            cout<< currentNode->name << "\t : \t" << count <<endl;
+            currentNode = currentNode->down;
+        }
+    }
 
-    cout << "\n\n C] Depth-First Search Traversal (using Stack)............\n";
-    G1.DFS(Head);
+    void BFS ( string node ) {
+        queue<string> Queue;
+        vector<string> visited;
+        Queue.push( node );
+        visited.push_back( node );
+        while( true ) {
 
-    cout << "\n\n D] Breadth-First Search Traversal (using Queue)............\n";
-    G1.BFS(Head);
+            if( !Queue.empty() ) {
+                node = Queue.front();
+                Queue.pop();
+                cout<< node << " ";
+            }
+            else {
+                cout<<endl;
+                break;
+            }
 
+            Node *currentNode = head;
+            bool found = false;
+            while ( currentNode != nullptr ) {
+                if( currentNode->name == node ) {
+                    found = true;
+                    Node *currentListNode = currentNode->next;
+                    while( currentListNode != nullptr ){    
+                        if( find( visited.begin(), visited.end(), currentListNode->name ) == visited.end() ) {
+                            visited.push_back( currentListNode->name );
+                            Queue.push( currentListNode->name );
+                        }
+                        currentListNode = currentListNode->next;
+                    }
+                    break;
+                }
+                currentNode = currentNode->down;
+            }
+            if( !found ) {
+                cout<< "Given node not in the graph" <<endl;
+                return;
+            }
+        }
+    }
+
+    void DFS ( string node ) {
+        stack<string> Stack;
+        vector<string> visited;
+        Stack.push( node );
+        visited.push_back( node );
+        while( true ) {
+            if( !Stack.empty() ) {
+                node = Stack.top();
+                Stack.pop();
+                cout<< node << " ";
+            }
+            else {
+                cout<<endl;
+                break;
+            }
+
+            Node *currentNode = head;
+            bool found = false;
+            while ( currentNode != nullptr ) {
+                if( currentNode->name == node ) {
+                    found = true;
+                    Node *currentListNode = currentNode->next;
+                    while( currentListNode != nullptr ) {
+                        if( find( visited.begin(), visited.end(), currentListNode->name ) == visited.end() ) {
+                            Stack.push( currentListNode->name );
+                            visited.push_back( currentListNode->name );
+                        }
+                        currentListNode = currentListNode->next;
+                    }
+                    break;
+                }
+                currentNode = currentNode->down;
+            }
+            if( !found ) {
+                cout<< "Given node doesn't exist in the graph" <<endl;
+                return;
+            }
+        }
+    }
+};
+
+int main() {
+    Graph g ; 
+    g.addNode( "Katraj" , "PICT" ) ;
+    g.addNode( "Bharti" , "Katraj" ) ; 
+    g.addNode( "Bharti" , "PICT" ) ;
+    g.addNode( "Katraj" , "SKNCOE" ) ; 
+    g.addNode( "PICT" , "SKNCOE" ) ;
+    g.addNode( "SKNCOE" , "Temple" ) ; 
+    g.addNode( "Temple" , "Katraj" ) ; 
+    g.addNode( "Temple" , "Kondhwa" ) ; 
+    g.print() ; 
+    g.printInDegrees();
+    g.printOutDegrees();
+    g.BFS( "Katraj" ) ; 
+    g.DFS( "Katraj" ) ;
     return 0;
 }
